@@ -680,16 +680,43 @@ class SoupStrainer(ElementFilter):
         :meta private:
         """
         return element if self.match(element) else None
-class SoupReplacer:
-    """
-    Minimal replacer used at parse time.
-    Replace every tag whose name == og_tag with alt_tag.
-    """
-    def __init__(self, og_tag: str, alt_tag: str):
-        self.og_tag = og_tag
-        self.alt_tag = alt_tag
 
-    def replace(self, tag_name: str) -> str:
-        if tag_name == self.og_tag:
-            return self.alt_tag
-        return tag_name
+class SoupReplacer:
+    def __init__(self, name_xformer=None, attrs_xformer=None, xformer=None, old_name=None, new_name=None):
+        if isinstance(name_xformer, str) and isinstance(attrs_xformer, str) and xformer is None:
+            old_name = name_xformer
+            new_name = attrs_xformer
+            name_xformer = attrs_xformer = None
+        self.name_xformer = name_xformer
+        self.attrs_xformer = attrs_xformer
+        self.xformer = xformer
+        self.old_name = old_name
+        self.new_name = new_name
+
+    def apply(self, tag):
+        if self.name_xformer:
+            try:
+                new_name = self.name_xformer(tag)
+                if new_name and isinstance(new_name, str):
+                    tag.name = new_name
+            except Exception:
+                pass
+
+        if self.attrs_xformer:
+            try:
+                new_attrs = self.attrs_xformer(tag)
+                if isinstance(new_attrs, dict):
+                    tag.attrs = new_attrs
+            except Exception:
+                pass
+
+        if self.xformer:
+            try:
+                self.xformer(tag)
+            except Exception:
+                pass
+
+    def replace(self, name):
+        if self.old_name and self.new_name and name == self.old_name:
+            return self.new_name
+        return name

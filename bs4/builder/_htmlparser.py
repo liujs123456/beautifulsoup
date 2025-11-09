@@ -146,8 +146,9 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
         attrs: List[Tuple[str, Optional[str]]],
         handle_empty_element: bool = True,
     ) -> None:
-        if self.soup.replacer:
-            name = self.soup.replacer.replace(name)
+        if hasattr(self.soup, "replacer") and self.soup.replacer:
+            if hasattr(self.soup.replacer, "replace"):
+                name = self.soup.replacer.replace(name)
 
         """Handle an opening tag, e.g. '<tag>'
 
@@ -186,6 +187,13 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
         tag = self.soup.handle_starttag(
             name, None, None, attr_dict, sourceline=sourceline, sourcepos=sourcepos
         )
+        if hasattr(self.soup, "replacer") and self.soup.replacer:
+            try:
+                self.soup.replacer.apply(tag)
+            except Exception as e:
+                import warnings
+                warnings.warn(f"SoupReplacer failed on tag <{name}>: {e}")
+
         if tag and tag.is_empty_element and handle_empty_element:
             # Unlike other parsers, html.parser doesn't send separate end tag
             # events for empty-element tags. (It's handled in
@@ -213,9 +221,10 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
            be the closing portion of an empty-element tag,
            e.g. '<tag></tag>'.
         """
-        # print("END", name)
-        if self.soup.replacer:
-            name = self.soup.replacer.replace(name)
+
+        if hasattr(self.soup, "replacer") and self.soup.replacer:
+            if hasattr(self.soup.replacer, "replace"):
+                name = self.soup.replacer.replace(name)
 
         assert self.soup is not None
         self.soup.handle_endtag(name)
