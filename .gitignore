@@ -4,3 +4,8 @@ apps/m2/Text.xml
 # Python caches
 __pycache__/
 *.pyc
+
+# Python caches
+__pycache__/
+*.py[cod]
+*..class
