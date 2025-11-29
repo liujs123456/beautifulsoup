@@ -5,13 +5,12 @@ from bs4.filter import SoupReplacer
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python task6.py <input> <output>")
+        print("Usage: PYTHONPATH=. python apps/m2/task6.py apps/m2/sample.html apps/m2/sample_out.html")
         return
 
     input_path = sys.argv[1]
     output_path = sys.argv[2]
 
-    # Ensure output directory exists
     output_task6 = os.path.dirname(output_path)
     if output_task6 and not os.path.exists(output_task6):
         os.makedirs(output_task6)
@@ -25,16 +24,10 @@ def main():
         print(f"Error! File Not Found: {input_path}")
         return
 
-    # Replace <b> → <blockquote>
     replacer = SoupReplacer("b", "blockquote")
 
-    # Choose parser type
-    if input_path.endswith(".xml"):
-        soup = BeautifulSoup(html, "lxml-xml", replacer=replacer)
-    else:
-        soup = BeautifulSoup(html, "lxml", replacer=replacer)
+    soup = BeautifulSoup(html, "html.parser", replacer=replacer)
 
-    # Format and write output file
     pretty_html = soup.prettify()
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(pretty_html)

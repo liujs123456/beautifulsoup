@@ -431,7 +431,7 @@ class BeautifulSoup(Tag):
                     "Keyword arguments to the BeautifulSoup constructor will be ignored. These would normally be passed into the TreeBuilder constructor, but a TreeBuilder instance was passed in as `builder`."
                 )
         self.builder = builder
-        self.replacer = replacer or kwargs.get("replacer")
+        self.replacer = replacer
         self.is_xml = builder.is_xml
         self.known_xml = self.is_xml
         self._namespaces = dict()
